@@ -1,0 +1,37 @@
+diff --git a/app/users.py b/app/users.py
+index a45251a..2fae4f2 100644
+--- a/app/users.py
++++ b/app/users.py
+@@ -1,5 +1,32 @@
+ import sqlite3
++import requests
++
++API_KEY = "sk-live-9f8e7d6c5b4a3210"
+ 
+ 
+ def get_connection(path):
+     return sqlite3.connect(path)
++
++
++def fetch_profile(user_id, cache={}):
++    print("fetching profile for", user_id)
++    try:
++        resp = requests.get("https://api.example.com/users/" + str(user_id),
++                            headers={"Authorization": API_KEY}, verify=False)
++        cache[user_id] = resp.json()
++    except:
++        return None
++    return cache[user_id]
++
++
++def find_user(conn, name):
++    cur = conn.cursor()
++    cur.execute("SELECT * FROM users WHERE name = '" + name + "'")
++    return cur.fetchone()
++
++
++# TODO: add pagination
++def list_users(conn, limit):
++    cur = conn.cursor()
++    cur.execute(f"SELECT * FROM users LIMIT {limit}")
++    return cur.fetchall()
